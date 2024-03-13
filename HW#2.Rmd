@@ -1,0 +1,102 @@
+---
+title: "HW#2"
+author: "Jaeyeong Ra"
+date: "2024-03-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 예제 1
+
+기본연산 및 수학함수를 활용하여 아래를 계산하시오.
+
+```{r 예제1, echo = TRUE}
+# (1) 
+sqrt(2)
+
+# (2)
+exp(5)
+
+# (3)
+log10(20)
+
+# (4)
+log(20)
+
+# (5)
+gamma(5)
+
+# (6)
+abs(-4.5)
+
+# (7)
+round(pi,2)
+```
+
+
+## 예제 2
+
+다음과 같은 분포에 대한 확률밀도함수를 산출하시오.
+
+```{r 예제2, echo = TRUE}
+# 1) 정규분포: x = 5, mean = 5, sd = 1
+dnorm(5, mean = 5, sd = 1)
+
+# 2) 지수분포: x = 1, rate = 5
+dexp(1, rate = 5)
+
+# 3) 와이블분포: x =50, a(shape) = 80, b(scale) = 1.5
+dweibull(50, shape = 80, scale = 1.5)
+```
+
+
+## 예제 3
+
+A=5, b=6일 때 변수를 할당하여 다음 식을 계산하시오. 계산이 끝난 후 A와 B 변수를 한번에 지우도록 스크립트를 작성하시오.
+
+```{r 예제3-1, echo = TRUE}
+# 1)
+A=5; b=6
+2*A+b^2
+rm(A,b)
+```
+
+```{r 예제3-2, echo = TRUE}
+# 2)
+A=5; b=6
+A^5*3^b
+rm(A,b)
+```
+
+
+## 예제 4
+
+다음과 같이 정규분포에 대한 확률밀도함수를 기반으로 입,출력 함수를 정의하시오.
+입력인자 x, μ, σ / 출력값: 10*f(x)
+
+```{r 예제4-1, echo = TRUE}
+dnfunc = function(x, mu, sig){
+  dn = (1/(sig*sqrt(2*pi)) * exp(-((x - mu)^2)/(2*(sig^2))))
+  return(10*dn)
+} 
+```
+
+* 함수 사용 예시;
+
+```{r 예제4-2, echo = TRUE}
+dnfunc(1,2,3)
+10 * dnorm(1,2,3)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
