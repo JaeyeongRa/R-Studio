@@ -61,12 +61,10 @@ A=5, b=6일 때 변수를 할당하여 다음 식을 계산하시오. 계산이 
 # 1)
 A=5; b=6
 2*A+b^2
-rm(A,b)
 ```
 
 ```{r 예제3-2, echo = TRUE}
 # 2)
-A=5; b=6
 A^5*3^b
 rm(A,b)
 ```
@@ -84,12 +82,103 @@ dnfunc = function(x, mu, sig){
 } 
 ```
 
-* 함수 사용 예시;
+* 함수 사용 예시 및 확인;
 
 ```{r 예제4-2, echo = TRUE}
 dnfunc(1,2,3)
 10 * dnorm(1,2,3)
 ```
+
+
+## 예제 5
+
+합 : sum, 곱 : prod 함수를 사용할 때, 아래의 연산을 수행하시오.
+
+```{r 예제5, echo = TRUE}
+# (1)
+x = c(1:100)
+sum(x^2)
+
+# (2)
+y = c(1:10)
+prod(y)
+
+# (3)
+z = c(1:20)
+sum(cos((pi/20)*z))
+```
+
+
+## 예제 6
+
+2의 배수로 구성된 3*3 행렬을 생성하고, 행 이름을 알파벳, 열 이름을 한글로 정의하시오. 또한, 2행 3열에 해당하는 값을 추출하시오.
+
+```{r 예제6, echo = TRUE}
+
+# 2의 배수로 구성된 3*3 행렬 생성
+matelem = 2*c(1:9)
+mat = matrix(matelem, nrow = 3, ncol = 3)
+print(mat)
+
+# 행 이름을 알파벳으로 정의
+dimnames(mat)[[1]] = c('A','B','C')
+print(mat)
+
+# 열 이름은 한글로 정의
+dimnames(mat)[[2]] = c('가','나','다')
+print(mat)
+
+# 2행 3열의 해당하는 값을 추출
+mat[2,3]
+```
+
+
+## 예제 7
+
+R에서 기본으로 제공되는 iris 데이터에서, 종류(Species)가 ‘virginica’인 데이터만 추출하시오.
+
+```{r 예제7, echo = TRUE}
+data(iris)
+specvirg = iris[iris$Species == 'virginica',]
+print(specvirg)
+```
+
+
+## 예제 8
+
+iris 데이터의 3번째 열, Species 변수를 각각 벡터로 저장하고, 두 벡터를 원소로 가지는 리스트를 생성하시오.
+
+```{r 예제8, echo = TRUE}
+data(iris)
+iriscol3 = iris[,3]
+is.vector(iriscol3)
+irisspec = c(iris['Species'])
+is.vector(irisspec)
+irislist = list(iriscol3, irisspec)
+```
+
+```{r 예제8+, echo = TRUE}
+# 리스트 원소 확인
+irislist[[1]]
+```
+
+```{r 예제8++, echo = TRUE}
+# 리스트 원소 확인
+irislist[[2]]
+```
+
+
+## 예제 9
+
+데이터를 입력값으로 받아서 데이터의 각 행마다 아래의 반복문을 수행하는 함수 코드를 작성하시오.
+- 모든 행에 대하여 ‘Species’ 변수가 ‘setosa’인 경우 1을 출력, ‘versicolor’인 경우 2를 출력, ‘virginica’인 경우 3을 출력
+- 출력은 print() 함수를 사용할 것
+- 단순 연산이 아니라 “함수화”가 이루어진 코드만을 정답으로 인정
+
+```{r 예제9, echo = TRUE}
+data(iris)
+```
+
 
 ## Including Plots
 

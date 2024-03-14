@@ -403,9 +403,7 @@ A와 B 변수를 한번에 지우도록 스크립트를 작성하시오.</p>
 A=5; b=6
 2*A+b^2</code></pre>
 <pre><code>## [1] 46</code></pre>
-<pre class="r"><code>rm(A,b)</code></pre>
 <pre class="r"><code># 2)
-A=5; b=6
 A^5*3^b</code></pre>
 <pre><code>## [1] 2278125</code></pre>
 <pre class="r"><code>rm(A,b)</code></pre>
@@ -419,12 +417,179 @@ A^5*3^b</code></pre>
   return(10*dn)
 } </code></pre>
 <ul>
-<li>함수 사용 예시;</li>
+<li>함수 사용 예시 및 확인;</li>
 </ul>
 <pre class="r"><code>dnfunc(1,2,3)</code></pre>
 <pre><code>## [1] 1.257944</code></pre>
 <pre class="r"><code>10 * dnorm(1,2,3)</code></pre>
 <pre><code>## [1] 1.257944</code></pre>
+</div>
+<div id="예제-5" class="section level2">
+<h2>예제 5</h2>
+<p>합 : sum, 곱 : prod 함수를 사용할 때, 아래의 연산을 수행하시오.</p>
+<pre class="r"><code># (1)
+x = c(1:100)
+sum(x^2)</code></pre>
+<pre><code>## [1] 338350</code></pre>
+<pre class="r"><code># (2)
+y = c(1:10)
+prod(y)</code></pre>
+<pre><code>## [1] 3628800</code></pre>
+<pre class="r"><code># (3)
+z = c(1:20)
+sum(cos((pi/20)*z))</code></pre>
+<pre><code>## [1] -1</code></pre>
+</div>
+<div id="예제-6" class="section level2">
+<h2>예제 6</h2>
+<p>2의 배수로 구성된 3*3 행렬을 생성하고, 행 이름을 알파벳, 열 이름을
+한글로 정의하시오. 또한, 2행 3열에 해당하는 값을 추출하시오.</p>
+<pre class="r"><code># 2의 배수로 구성된 3*3 행렬 생성
+matelem = 2*c(1:9)
+mat = matrix(matelem, nrow = 3, ncol = 3)
+print(mat)</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    2    8   14
+## [2,]    4   10   16
+## [3,]    6   12   18</code></pre>
+<pre class="r"><code># 행 이름을 알파벳으로 정의
+dimnames(mat)[[1]] = c(&#39;A&#39;,&#39;B&#39;,&#39;C&#39;)
+print(mat)</code></pre>
+<pre><code>##   [,1] [,2] [,3]
+## A    2    8   14
+## B    4   10   16
+## C    6   12   18</code></pre>
+<pre class="r"><code># 열 이름은 한글로 정의
+dimnames(mat)[[2]] = c(&#39;가&#39;,&#39;나&#39;,&#39;다&#39;)
+print(mat)</code></pre>
+<pre><code>##   가 나 다
+## A  2  8 14
+## B  4 10 16
+## C  6 12 18</code></pre>
+<pre class="r"><code># 2행 3열의 해당하는 값을 추출
+mat[2,3]</code></pre>
+<pre><code>## [1] 16</code></pre>
+</div>
+<div id="예제-7" class="section level2">
+<h2>예제 7</h2>
+<p>R에서 기본으로 제공되는 iris 데이터에서, 종류(Species)가
+’virginica’인 데이터만 추출하시오.</p>
+<pre class="r"><code>data(iris)
+specvirg = subset(iris, Species == &#39;virginica&#39;)
+print(specvirg)</code></pre>
+<pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width   Species
+## 101          6.3         3.3          6.0         2.5 virginica
+## 102          5.8         2.7          5.1         1.9 virginica
+## 103          7.1         3.0          5.9         2.1 virginica
+## 104          6.3         2.9          5.6         1.8 virginica
+## 105          6.5         3.0          5.8         2.2 virginica
+## 106          7.6         3.0          6.6         2.1 virginica
+## 107          4.9         2.5          4.5         1.7 virginica
+## 108          7.3         2.9          6.3         1.8 virginica
+## 109          6.7         2.5          5.8         1.8 virginica
+## 110          7.2         3.6          6.1         2.5 virginica
+## 111          6.5         3.2          5.1         2.0 virginica
+## 112          6.4         2.7          5.3         1.9 virginica
+## 113          6.8         3.0          5.5         2.1 virginica
+## 114          5.7         2.5          5.0         2.0 virginica
+## 115          5.8         2.8          5.1         2.4 virginica
+## 116          6.4         3.2          5.3         2.3 virginica
+## 117          6.5         3.0          5.5         1.8 virginica
+## 118          7.7         3.8          6.7         2.2 virginica
+## 119          7.7         2.6          6.9         2.3 virginica
+## 120          6.0         2.2          5.0         1.5 virginica
+## 121          6.9         3.2          5.7         2.3 virginica
+## 122          5.6         2.8          4.9         2.0 virginica
+## 123          7.7         2.8          6.7         2.0 virginica
+## 124          6.3         2.7          4.9         1.8 virginica
+## 125          6.7         3.3          5.7         2.1 virginica
+## 126          7.2         3.2          6.0         1.8 virginica
+## 127          6.2         2.8          4.8         1.8 virginica
+## 128          6.1         3.0          4.9         1.8 virginica
+## 129          6.4         2.8          5.6         2.1 virginica
+## 130          7.2         3.0          5.8         1.6 virginica
+## 131          7.4         2.8          6.1         1.9 virginica
+## 132          7.9         3.8          6.4         2.0 virginica
+## 133          6.4         2.8          5.6         2.2 virginica
+## 134          6.3         2.8          5.1         1.5 virginica
+## 135          6.1         2.6          5.6         1.4 virginica
+## 136          7.7         3.0          6.1         2.3 virginica
+## 137          6.3         3.4          5.6         2.4 virginica
+## 138          6.4         3.1          5.5         1.8 virginica
+## 139          6.0         3.0          4.8         1.8 virginica
+## 140          6.9         3.1          5.4         2.1 virginica
+## 141          6.7         3.1          5.6         2.4 virginica
+## 142          6.9         3.1          5.1         2.3 virginica
+## 143          5.8         2.7          5.1         1.9 virginica
+## 144          6.8         3.2          5.9         2.3 virginica
+## 145          6.7         3.3          5.7         2.5 virginica
+## 146          6.7         3.0          5.2         2.3 virginica
+## 147          6.3         2.5          5.0         1.9 virginica
+## 148          6.5         3.0          5.2         2.0 virginica
+## 149          6.2         3.4          5.4         2.3 virginica
+## 150          5.9         3.0          5.1         1.8 virginica</code></pre>
+</div>
+<div id="예제-8" class="section level2">
+<h2>예제 8</h2>
+<p>iris 데이터의 3번째 열, Species 변수를 각각 벡터로 저장하고, 두
+벡터를 원소로 가지는 리스트를 생성하시오.</p>
+<pre class="r"><code>data(iris)
+iriscol3 = iris[,3]
+is.vector(iriscol3)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>irisspec = c(iris[&#39;Species&#39;])
+is.vector(irisspec)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>irislist = list(iriscol3, irisspec)</code></pre>
+<pre class="r"><code># 리스트 원소 확인
+irislist[[1]]</code></pre>
+<pre><code>##   [1] 1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 1.5 1.6 1.4 1.1 1.2 1.5 1.3 1.4
+##  [19] 1.7 1.5 1.7 1.5 1.0 1.7 1.9 1.6 1.6 1.5 1.4 1.6 1.6 1.5 1.5 1.4 1.5 1.2
+##  [37] 1.3 1.4 1.3 1.5 1.3 1.3 1.3 1.6 1.9 1.4 1.6 1.4 1.5 1.4 4.7 4.5 4.9 4.0
+##  [55] 4.6 4.5 4.7 3.3 4.6 3.9 3.5 4.2 4.0 4.7 3.6 4.4 4.5 4.1 4.5 3.9 4.8 4.0
+##  [73] 4.9 4.7 4.3 4.4 4.8 5.0 4.5 3.5 3.8 3.7 3.9 5.1 4.5 4.5 4.7 4.4 4.1 4.0
+##  [91] 4.4 4.6 4.0 3.3 4.2 4.2 4.2 4.3 3.0 4.1 6.0 5.1 5.9 5.6 5.8 6.6 4.5 6.3
+## [109] 5.8 6.1 5.1 5.3 5.5 5.0 5.1 5.3 5.5 6.7 6.9 5.0 5.7 4.9 6.7 4.9 5.7 6.0
+## [127] 4.8 4.9 5.6 5.8 6.1 6.4 5.6 5.1 5.6 6.1 5.6 5.5 4.8 5.4 5.6 5.1 5.1 5.9
+## [145] 5.7 5.2 5.0 5.2 5.4 5.1</code></pre>
+<pre class="r"><code># 리스트 원소 확인
+irislist[[2]]</code></pre>
+<pre><code>## $Species
+##   [1] setosa     setosa     setosa     setosa     setosa     setosa    
+##   [7] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [13] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [19] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [25] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [31] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [37] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [43] setosa     setosa     setosa     setosa     setosa     setosa    
+##  [49] setosa     setosa     versicolor versicolor versicolor versicolor
+##  [55] versicolor versicolor versicolor versicolor versicolor versicolor
+##  [61] versicolor versicolor versicolor versicolor versicolor versicolor
+##  [67] versicolor versicolor versicolor versicolor versicolor versicolor
+##  [73] versicolor versicolor versicolor versicolor versicolor versicolor
+##  [79] versicolor versicolor versicolor versicolor versicolor versicolor
+##  [85] versicolor versicolor versicolor versicolor versicolor versicolor
+##  [91] versicolor versicolor versicolor versicolor versicolor versicolor
+##  [97] versicolor versicolor versicolor versicolor virginica  virginica 
+## [103] virginica  virginica  virginica  virginica  virginica  virginica 
+## [109] virginica  virginica  virginica  virginica  virginica  virginica 
+## [115] virginica  virginica  virginica  virginica  virginica  virginica 
+## [121] virginica  virginica  virginica  virginica  virginica  virginica 
+## [127] virginica  virginica  virginica  virginica  virginica  virginica 
+## [133] virginica  virginica  virginica  virginica  virginica  virginica 
+## [139] virginica  virginica  virginica  virginica  virginica  virginica 
+## [145] virginica  virginica  virginica  virginica  virginica  virginica 
+## Levels: setosa versicolor virginica</code></pre>
+</div>
+<div id="예제-9" class="section level2">
+<h2>예제 9</h2>
+<p>데이터를 입력값으로 받아서 데이터의 각 행마다 아래의 반복문을
+수행하는 함수 코드를 작성하시오. - 모든 행에 대하여 ‘Species’ 변수가
+’setosa’인 경우 1을 출력, ’versicolor’인 경우 2를 출력, ’virginica’인
+경우 3을 출력 - 출력은 print() 함수를 사용할 것 - 단순 연산이 아니라
+“함수화”가 이루어진 코드만을 정답으로 인정</p>
+<pre class="r"><code>data(iris)</code></pre>
 </div>
 <div id="including-plots" class="section level2">
 <h2>Including Plots</h2>
