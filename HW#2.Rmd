@@ -177,6 +177,9 @@ irislist[[2]]
 
 ```{r 예제9, echo = TRUE}
 data(iris)
+# for()
+
+
 ```
 
 

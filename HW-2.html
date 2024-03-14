@@ -475,7 +475,7 @@ mat[2,3]</code></pre>
 <p>R에서 기본으로 제공되는 iris 데이터에서, 종류(Species)가
 ’virginica’인 데이터만 추출하시오.</p>
 <pre class="r"><code>data(iris)
-specvirg = subset(iris, Species == &#39;virginica&#39;)
+specvirg = iris[iris$Species == &#39;virginica&#39;,]
 print(specvirg)</code></pre>
 <pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width   Species
 ## 101          6.3         3.3          6.0         2.5 virginica
@@ -589,7 +589,8 @@ irislist[[2]]</code></pre>
 ’setosa’인 경우 1을 출력, ’versicolor’인 경우 2를 출력, ’virginica’인
 경우 3을 출력 - 출력은 print() 함수를 사용할 것 - 단순 연산이 아니라
 “함수화”가 이루어진 코드만을 정답으로 인정</p>
-<pre class="r"><code>data(iris)</code></pre>
+<pre class="r"><code>data(iris)
+# for()</code></pre>
 </div>
 <div id="including-plots" class="section level2">
 <h2>Including Plots</h2>
