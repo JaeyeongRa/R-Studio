@@ -171,26 +171,26 @@ irislist[[2]]
 ## 예제 9
 
 데이터를 입력값으로 받아서 데이터의 각 행마다 아래의 반복문을 수행하는 함수 코드를 작성하시오.
+
 - 모든 행에 대하여 ‘Species’ 변수가 ‘setosa’인 경우 1을 출력, ‘versicolor’인 경우 2를 출력, ‘virginica’인 경우 3을 출력
 - 출력은 print() 함수를 사용할 것
 - 단순 연산이 아니라 “함수화”가 이루어진 코드만을 정답으로 인정
 
 ```{r 예제9, echo = TRUE}
 data(iris)
-# for()
 
+numbering = function(dat){
+  for(i in 1:length(dat[,1])){
+   if(dat$Species[i] == 'setosa'){
+     print(1)
+   } else if(dat$Species[i] == 'versicolor'){
+     print(2)
+   } else if(dat$Species[i] == 'virginica'){
+     print(3)
+   }
+  }
+}
 
-# print()
+numbering(iris)
 
 ```
-
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
