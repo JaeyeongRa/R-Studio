@@ -14,6 +14,47 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 <br>
 <br>
 
+## [시뮬레이션]
+
+### 1. 중심극한정리
+```{r simul_clt}
+x = list()
+
+for(i in 1:100){
+  x[[i]] = rnorm(10000, mean = 20, sd = 10)
+}
+meanx = Reduce('+',x)/length(x)
+print(mean(meanx))
+print(sd(meanx))
+
+```
+### 2. 평균, 분산 테스트
+```{r simul_expvar}
+
+meanvar = function(dist, n=10000, param){
+  # exponential, binomial
+  if(dist == 'exp'){
+    rand = rexp(n, rate = param[1])
+    m = 1/param[1]
+    v = 1/param[1]^2
+  }else if(dist == 'binom'){
+    rand = rbinom(n, size = param[1], prob = param[2])
+    m = param[1]*param[2]
+    v = param[1]*param[2]*(1-param[2])
+  }
+print(mean(rand))
+print(m)
+print(var(rand))
+print(v)
+}
+
+meanvar('exp',100000 , 0.1)
+meanvar('binom',10000,c(100,0.2))
+
+```
+
+## [데이터분석]
+
 ### 0. 대상 데이터 확보: 공구 마모 데이터셋
 (https://www.kaggle.com/datasets/shivamb/machine-predictive-maintenance-classification)
 
@@ -40,6 +81,34 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 ### 1. 데이터 탐색 (EDA) 및 전처리
 ```{r data_eda}
 
+list.files(pattern = '.csv')
+dat = read.csv('산업공학특론I_3주차_실습 데이터.csv')
+head(dat)
+
+# 불필요한 변수 삭제
+dat = dat[,-(1:2)]
+dat$Target = as.factor(dat$Target)
+dat$Type = as.factor(dat$Type)
+dat$Failure.Type = as.factor(dat$Failure.Type)
+
+summary(dat)
+
+# 데이터 탐색을 위한 시각화 수행
+
+vis = function(x){
+  if(is.factor(x)){
+    barplot(table(x),col='grey')
+  }else{
+    hist(x, col = 'grey')
+  }
+}
+
+par(mfrow=c(4,2))
+
+for(i in 1:ncol(dat)){
+  vis(x = dat[,i])
+}
+
 ```
 
 <br>
@@ -48,6 +117,10 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 
 ### 2. 데이터 그룹화 및 기술통계량 검토
 ```{r data_group}
+
+dat_split = split(dat$Tool.wear..min., dat$Target)
+summary(dat_split[[1]])
+summary(dat_split[[2]])
 
 ```
 
@@ -58,5 +131,20 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 ### 3. 확률분포 적합
 
 ```{r data_dist}
+
+install.packages('fitdistrplus')
+library(fitdistrplus)
+
+names(dat_split)
+normal = dat_split[[1]]
+fail = dat_split[[2]]
+
+fitdist(normal, 'exp')
+fitdist(fail, 'exp')
+
+fitdist(normal, 'norm')
+
+fitdist(dat.split)
+
 
 ```
