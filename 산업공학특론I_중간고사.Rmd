@@ -1,6 +1,6 @@
 ---
 title: "산업공학특론I_중간고사"
-author: "제출자명 (학번)"
+author: "나재영 (2024189799)"
 date: "4/10/2024"
 output: html_document
 ---
@@ -70,6 +70,61 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 
 ```{r no_1}
 
+# 데이터 불러오기
+clth_dat = read.csv('산업공학특론I_중간고사 데이터.csv')
+
+# 데이터 확인
+head(clth_dat)
+summary(clth_dat)
+
+# 활용할 변수 및 활용하지 않는 변수 확인
+colnames(clth_dat)
+
+# 활용하지 않는 변수* 삭제
+# * [1]date, [7]smv, [8]wip, [11]idle_time, [12]idle_men, [13]no_of_style_change, [14]no_of_workers
+delcol = c(1,7,8,11,12,13,14) # 필요 없는 열
+clth_dat_pp = clth_dat[-delcol] # 필요 없는 열 삭제
+
+# 전처리 후 데이터 확인
+colnames(clth_dat_pp)
+head(clth_dat_pp)
+summary(clth_dat_pp)
+
+# 각 열의 카테고리 수 확인
+{
+  for(i in 1:ncol(clth_dat_pp)){
+    print(c(colnames(clth_dat_pp[i]), length(table(clth_dat_pp[i]))))
+  }
+  print(c('data length',nrow(clth_dat_pp)))
+}
+
+# 범주형 변수*의 범주 확인
+# * [1]quarter, [2]department, [3]day, [4]team, [5]targeted_productivity
+
+for(i in 1:5){
+  print(table(clth_dat_pp[i]))
+}
+
+# department의 'finishing'과 'finishing '을 하나로 묶음
+c = clth_dat_pp$department
+c = gsub(pattern = 'finishing ', replacement = 'finishing', c)
+print(table(c))
+clth_dat_pp$department = c
+
+# 범주형 변수(1~5)에 대한 시각화 (막대그래프)
+
+for(i in 1:5){
+  barplot(table(clth_dat_pp[i]),main = colnames(clth_dat_pp[i]))
+}
+
+# 연속형 변수(6~8)에 대한 시각화 (히스토그램)
+
+for(i in 6:8){
+  hist(clth_dat_pp[,i], main = colnames(clth_dat_pp[i]))
+}
+
+# head(sort(clth_dat_pp$incentive, decreasing = T), n=50)
+
 ```
 
 <br>
@@ -82,6 +137,94 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 * 추정 결과에 따른 최적 분포를 도출하고, 그 근거를 제시할 것
 
 ```{r no_2}
+
+# 사용할 데이터 추출
+
+dat = clth_dat_pp$actual_productivity
+
+# MLE(최대우도법)를 위한 분포별 로그우도함수(log-likelihood function) 및 계산
+
+# Normal Distribution 가정
+
+mlen = function(prm){
+  -sum(dnorm(dat, mean = prm[1], sd = prm[2], log = TRUE))
+}
+
+optn = optim(c(mean(dat),sd(dat)), mlen)
+
+
+# Log-normal Distribution 가정
+
+mleln = function(prm){
+  -sum(dlnorm(dat, meanlog = prm[1], sdlog = prm[2], log = TRUE))
+}
+
+optln = optim(c(mean(log(dat)),sd(log(dat))), mleln)
+
+
+# Gamma Distribution 가정
+
+mleg = function(prm){
+  -sum(dgamma(dat, shape = prm[1], rate = prm[2], log = TRUE))
+}
+
+optg = optim(c(1,1), mleg)
+
+
+# Weibull Distribution 가정
+
+mlew = function(prm){
+  -sum(dweibull(dat, shape = prm[1], scale = prm[2], log = TRUE))
+}
+
+optw = optim(c(1,1), mlew)
+
+optw
+
+
+# 각 분포 시각화
+
+{
+hist(dat, col='grey', main = 'actual_productivity',prob = T)
+curve(dnorm(x, mean = optn$par[1], sd = optn$par[2]), col='red', add = TRUE)
+curve(dlnorm(x, meanlog = optln$par[1], sdlog = optln$par[2]), col='yellow', add = TRUE)
+curve(dgamma(x, shape = optg$par[1], rate = optg$par[2]), col='blue', add = TRUE)
+curve(dweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', add = TRUE)
+legend('topleft',legend = c('Normal','Log-normal','Gamma','Weibull'), col=c('red','yellow','blue','green'), lty = 1, lwd = 2)
+
+plot(ecdf(dat), col='grey', main = 'CDF')
+curve(pnorm(x, mean = optn$par[1], sd = optn$par[2]), col='red', lwd = 2, add = TRUE)
+curve(plnorm(x, meanlog = optln$par[1], sdlog = optln$par[2]), col='yellow', lwd = 2, add = TRUE)
+curve(pgamma(x, shape = optg$par[1], rate = optg$par[2]), col='blue', lwd = 2, add = TRUE)
+curve(pweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', lwd = 2, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+}
+
+# 각 분포별 최대우도값 비교
+
+print(c(-optn$value, -optln$value, -optg$value, -optw$value))
+
+# 최대 우도값이 가장 높은 최적 분포로 Weibull 분포 선정
+
+simul_actprod = rweibull(n = length(dat), shape = optw$par[1], scale = optw$par[2])
+
+# 최적 분포 시뮬레이션 결과와 원 데이터 비교 (시각화)
+
+{
+hist(dat, col = adjustcolor('red', alpha = 0.8), main = 'Histogram', prob = T)
+hist(simul_actprod, col = adjustcolor('green', alpha = 0.2), prob = T, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+
+plot(density(dat), col='red', main = 'PDF', lwd = 2)
+curve(dweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', lwd = 2, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+
+plot(ecdf(dat), col='red', main = 'CDF', lwd = 2)
+curve(pweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', lwd = 2, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+}
+
+# Weibull 분포가 왼쪽으로 긴 꼬리(Left-Skewed, 왜도값이 음수)를 가진 실 데이터의 형태를 가장 잘 나타냄
 
 ```
 
