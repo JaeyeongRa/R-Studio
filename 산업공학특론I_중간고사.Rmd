@@ -361,6 +361,8 @@ a_ap_dp = 0.99
 
 # 단계3) 분포 및 기각역 설정
 
+dat_ap_dp = split(clth_dat_pp$actual_productivity, clth_dat_pp$department)
+
 # 두 개의 모분산의 비에 관한 검정(F-검정)
 if(var(dat_ap_dp$finishing) > var(dat_ap_dp$sweing)){
   print("V1 = var_fin")
@@ -585,7 +587,7 @@ if(csq_t_d > chi_a){
 
 
 ## 팀 수에 따른 m X n 분할 (* team이 팀 번호를 나타내는 경우)
-'''
+
 # 팀 1~12, 요일 1~6 의 이산형이므로 12*6 분할표 작성
 
 dat_t_d = split(clth_dat_pp$team, clth_dat_pp$day)
@@ -638,8 +640,6 @@ if(csq_t_d > chi_a){
 }
 
 # 귀무가설 채택하여, 생산 공정에 투입되는 팀(team)의 분포가 요일(day)에 관계없이 동일하다고 판정
-
-'''
 
 ```
 
