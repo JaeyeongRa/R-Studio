@@ -143,6 +143,7 @@ for(i in 6:8){
 dat = clth_dat_pp$actual_productivity
 
 # MLE(최대우도법)를 위한 분포별 로그우도함수(log-likelihood function) 및 계산
+??fitdist
 
 # Normal Distribution 가정 및 모수 추정
 
@@ -151,8 +152,6 @@ mlen = function(prm){
 }
 
 optn = optim(c(mean(dat),sd(dat)), mlen)
-
-??fitdist
 
 # Log-normal Distribution 가정 및 모수 추정
 
@@ -320,9 +319,18 @@ print(dsmat(clth_dat_pp$day))
 
 # 주차(quarter)별 목표/실제 생산성 점수
 
+# 평균값이 Quarter1, Quarter2에서 목표와 실제 생산성이 Quarter3, Quarter4에 비해 살짝 높은 모습을 보이며, Quarter5는 데이터 수가 부족하긴 하지만 실제 생산성이 다른 주차에 비해 10% 가량 높음
+# 검정으로 확인하면 정확하겠지만, 값만 보고 유추하면 주차별 목표/실제 생산성 점수간에 유의미한 차이는 없는 것으로 보임
+
 # 부서(department)별 목표/실제 생산성 점수
 
+# finishing 공정의 목표/실제 생산성이 sweing 공정보다 평균적으로 소폭 높은 것으로 나타남
+# 검정으로 확인이 필요하지만, 값만 보고 유추하자면 부서별 목표/실제 생산성 점수간에 유의미한 차이는 없는 것으로 보임
+
 # 요일(day)별 목표/실제 생산성 점수
+
+# 데이터 수와 평균의 분포가 요일에 상관없이 큰 편차 없이 고르게 분포 됨
+# 데이터 검정 없이 값만 보고 유추하면 요일별 목표/실제 생산성 점수간에 유의미한 차이는 없는 것으로 보임
 
 ```
 
@@ -336,42 +344,7 @@ print(dsmat(clth_dat_pp$day))
 
 ```{r no_5}
 
-# 모평균 가설검정
-
-# 단계1) 귀무가설/대립가설 설정
-
-# >> 귀무가설 H_0 : m_fin = m_sew
-# >> 대립가설 H_1 : m_fin != m_sew
-#    (m_fin은 finishing 부서의 생산성 점수 평균, m_sew는 sweing 부서의 생산성 점수 평균)
-
-# 단계2) 유의수준 설정
-
-a_ap_dp = 0.99
-
-# 단계3) 분포 및 기각역 설정
-
-# 두 개의 모평균 차에 관한 검정
-# 신뢰구간 상한
-U_max_ap_dp = qnorm(1-(1-a_ap_dp)/2)
-# 신뢰구간 하한
-U_min_ap_dp = -qnorm(1-(1-a_ap_dp)/2)
-
-# 단계4) 검정통계량 계산
-
-dat_ap_dp = split(clth_dat_pp$actual_productivity, clth_dat_pp$department)
-U_0_ap_dp = (mean(dat_ap_dp$finishing)-mean(dat_ap_dp$sweing))/(sqrt((var(dat_ap_dp$finishing)/length(dat_ap_dp$finishing))+(var(dat_ap_dp$sweing/length(dat_ap_dp$sweing)))))
-
-# 단계5) 결론 도출
-
-# 유의성 판정
-if(U_0_ap_dp < U_max_ap_dp && U_0_ap_dp > U_min_ap_dp){
-  print("신뢰구간 내")
-} else {
-  print("신뢰구간 외")
-}
-
-# >> 검정통계량이 신뢰구간 밖에 있으므로 귀무가설 기각하여, 두 분포의 평균이 다르다고 판정 (차이 유의미)
-
+## 등분산 여부를 확인하기 위해 모분산 가설검정 먼저 수행
 
 # 모분산 가설검정
 
@@ -403,7 +376,7 @@ F_min_ap_dp = (var(dat_ap_dp$finishing)/var(dat_ap_dp$sweing))/qf(1-(1-a_ap_dp)/
 
 # 단계4) 검정통계량 계산
 
-#var.test(dat_ap_dp$finishing, dat_ap_dp$sweing, conf.level = 0.99)
+var.test(dat_ap_dp$finishing, dat_ap_dp$sweing, conf.level = 0.99)
 F_0_ap_dp = var(dat_ap_dp$finishing)/var(dat_ap_dp$sweing)
 
 # 단계5) 결론 도출
@@ -417,6 +390,59 @@ if(1 < F_max_ap_dp && 1 > F_min_ap_dp){
 }
 
 # >> 가설(var_fin/var_sew = 1)이 신뢰구간 밖에 있으므로 귀무가설 기각하여, 두 분포의 분산은 다르다고 판정 (차이 유의미)
+# >> t-test 결과 p-value가 설정한 신뢰 수준보다 낮으며, var_fin/var_sew = 1을 가정했지만 1이 99 percent confidence interval 내에 포함되지 않으므로 귀무가설 기각
+
+
+# 모평균 가설검정 (불등분산 가정)
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : m_fin = m_sew
+# >> 대립가설 H_1 : m_fin != m_sew
+#    (m_fin은 finishing 부서의 생산성 점수 평균, m_sew는 sweing 부서의 생산성 점수 평균)
+
+# 단계2) 유의수준 설정
+
+a_ap_dp = 0.99
+
+# 단계3) 분포 및 기각역 설정
+
+# 모분산 미지이며 두 그룹간 모분산이 같지 않으므로 t-검정 수행
+# 등가 자유도 계산
+
+dfin = var(dat_ap_dp$finishing)/length(dat_ap_dp$finishing)
+dsew = var(dat_ap_dp$sweing)/length(dat_ap_dp$sweing)
+
+dfeq = ((dfin+dsew)^2)/((dfin^2)/((length(dat_ap_dp$finishing)-1))+((dsew^2)/(length(dat_ap_dp$sweing)-1)))
+
+# 신뢰구간 상한
+
+U_max_ap_dp = qt(1-(1-a_ap_dp)/2,df = dfeq)
+# 신뢰구간 하한
+U_min_ap_dp = -U_max_ap_dp
+
+# 단계4) 검정통계량 계산
+
+dat_ap_dp = split(clth_dat_pp$actual_productivity, clth_dat_pp$department)
+U_0_ap_dp = (mean(dat_ap_dp$finishing)-mean(dat_ap_dp$sweing))/sqrt(dfin+dsew)
+
+t_ap_dp = t.test(dat_ap_dp$finishing, dat_ap_dp$sweing, conf.level = a_ap_dp, var.equal = FALSE)
+
+# 단계5) 결론 도출
+
+# 유의성 판정
+if(U_0_ap_dp < U_max_ap_dp && U_0_ap_dp > U_min_ap_dp){
+  print("신뢰구간 내")
+} else {
+  print("신뢰구간 외")
+}
+
+t_ap_dp
+
+# >> 검정통계량이 신뢰구간 밖에 있으므로 귀무가설 기각하여, 두 분포의 평균이 다르다고 판정 (차이 유의미)
+# >> F-test 결과 p-value가 설정한 신뢰 수준보다 낮으며, m_fin - m_sew = 0을 가정했지만 0이 99 percent confidence interval 내에 포함되지 않으므로 귀무가설 기각
+
+
 
 ```
 
@@ -452,12 +478,13 @@ if(1 < F_max_ap_dp && 1 > F_min_ap_dp){
     }
   }
   
-  finrat = fin_sp/n_fin
-  sewrat = sew_sp/n_sew
+  finrat = fin_sp/n_fin # finishing 공정 생상성 초과 달성률
+  sewrat = sew_sp/n_sew # sweing 공정 생상성 초과 달성률
   nrat = (fin_sp+sew_sp)/(n_fin+n_sew)
 }
 
 # n수가 충분히 크므로 정규분포 근사 후 검정 수행 (이항분포의 P <= 0.5, nP >= 5 시 정규분포에 근사)
+# * 두 모부적합품률의 차의 검정과 유사
 
 # 단계1) 귀무가설/대립가설 설정
 
@@ -500,7 +527,65 @@ if(U_0_p_rat < U_max_p_rat && U_0_p_rat > U_min_p_rat){
 
 ```{r no_7}
 
-# m X n 분할표 작성
+## 인원수 평균에 대한 일차분할
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : 모든 요일별 평균 투입 인원이 동일
+# >> 대립가설 H_1 : 요일별 평균 투입 인원이 하나라도 다름
+
+
+# 단계2) 유의수준 설정
+
+a_t_d = 0.95
+
+# 단계3) 분포 및 기각역 설정
+
+dat_t_d = split(clth_dat_pp$team, clth_dat_pp$day) # 데이터 분할
+
+# 일차 분할표 작성
+
+{
+  md = c()
+
+  for(i in 1:length(dat_t_d)){
+    m = subset(clth_dat_pp$team, clth_dat_pp$day == names(dat_t_d)[i])
+    md = c(md, mean(m)) # 요일별 평균의 리스트
+  }
+  ma = rep(mean(clth_dat_pp$team), length(dat_t_d)) # 전체 평균의 리스트
+  mat = matrix(c(md,ma), nrow = 2, byrow = TRUE)
+  rownames(mat) = c("요일별 평균(observation)", "전체 평균(expectation)")
+  colnames(mat) = names(dat_t_d)
+}
+
+# 동일성 검정을 위한 Chi-Square 분포(자유도 = n-1) 설정
+chi_a = qchisq(a_t_d, (length(dat_t_d)-1))
+
+# 단계4) 검정통계량 계산
+
+{
+  csq_t_d = 0
+
+  for(i in 1:(length(dat_t_d))){
+    csq_t_d = csq_t_d + (((mat[1,i]-mat[2,i])^2)/mat[2,i])
+  }
+}
+
+# 단계5) 결론 도출
+
+chisq.test(rbind(md,ma))
+csq_t_d
+if(csq_t_d > chi_a){
+  print("귀무가설 기각")
+}else{
+  print("귀무가설 채택")
+}
+
+# 귀무가설 채택하여, 생산 공정에 투입되는 인원(team)이 요일(day)에 관계없이 동일하다고 판정
+
+
+## 팀 수에 따른 m X n 분할 (* team이 팀 번호를 나타내는 경우)
+'''
 # 팀 1~12, 요일 1~6 의 이산형이므로 12*6 분할표 작성
 
 dat_t_d = split(clth_dat_pp$team, clth_dat_pp$day)
@@ -534,17 +619,15 @@ chi_a = qchisq(a_t_d, (12-1)*(6-1))
 
 # 단계4) 검정통계량 계산
 
-csq_t_d = 0
+{
+  csq_t_d = 0
 
-for(i in 1:12){
-  for(j in 1:6){
-    csq_t_d = csq_t_d + (((m_n[i,j] - mat[i,j])^2)/mat[i,j])
+  for(i in 1:12){
+    for(j in 1:6){
+      csq_t_d = csq_t_d + (((m_n[i,j] - mat[i,j])^2)/mat[i,j])
+    }
   }
 }
-
-csq_t_d
-chi_a
-
 
 # 단계5) 결론 도출
 
@@ -554,7 +637,9 @@ if(csq_t_d > chi_a){
   print("귀무가설 채택")
 }
 
-# 귀무가설 채택하여, 생산 공정에 투입되는 인원 (team)이 요일 (day)에 관계없이 동일하다고 판정
+# 귀무가설 채택하여, 생산 공정에 투입되는 팀(team)의 분포가 요일(day)에 관계없이 동일하다고 판정
+
+'''
 
 ```
 
