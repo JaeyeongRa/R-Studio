@@ -70,6 +70,8 @@ trainidx = sample(1:nrow(dat_sc), 0.7*nrow(dat_sc))
 train = dat[trainidx,]
 test = dat[-trainidx,]
 
+head(test)
+
 nrow(test)
 nrow(train)
 nrow(dat_sc)
@@ -114,9 +116,10 @@ err = function(actual, pred){
   names(result) = c('MAE','MSE','RMSE')
   print(result)
 }
-
+test = as.data.frame(test)
+train = as.data.frame(train)
 pred_reg = predict(reg, test)
-err(test$Appliances, )
+err(test$Appliances, pred_reg)
 
 
 
@@ -129,6 +132,28 @@ err(test$Appliances, )
 
 ```{r pcr}
 
+install.packages('pls')
+library(pls)
+
+# 모델 수립
+
+pcr_model = pcr(Appliances ~ ., data = train, validation = 'CV')
+summary(pcr_model)
+
+biplot(pcr_model)
+
+plot(RMSEP(pcr_model))
+plot(pcr_model, ncomp = 6, line = TRUE)
+plot(pcr_model, 'loadings', comps = 1:6, legendpos = 'topright')
+
+pc = pcr_model$scores[,1:6] #최적 주성분 추출
+
+reg_pc = lm(train$Appliances ~ pc)
+
+
+# 예측력 평가
+pred_pcr = predict(pcr_model, test, ncomp = 6)
+err(test$Appliances, pred_pcr)
 
 
 ```
@@ -140,6 +165,26 @@ err(test$Appliances, )
 
 ```{r plsr}
 
+plsr_model = plsr(Appliances ~ ., data = train, validation = 'CV')
+summary(plsr_model)
 
+biplot(plsr_model)
+
+plot(RMSEP(plsr_model))
+plot(plsr_model, ncomp = 7, line = TRUE) # 7개 잠재변수 최적
+plot(plsr_model, 'loadings', comps = 1:7, legendpos = 'topright')
+
+pc = pcr_model$scores[,1:6] #최적 주성분 추출
+
+reg_pc = lm(train$Appliances ~ pc)
+
+# 예측력 평가
+
+lv = plsr_model$scores[,1:7]
+
+reg_lv = train(Appliances ~ ., data = train, method = 'lm', trControl = trainControl(method = 'cv'))
+
+pred_plsr = predict(plsr_model, test, ncomp = 7)
+err(test$Appliances, pred_plsr)
 
 ```
