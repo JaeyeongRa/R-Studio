@@ -1,0 +1,704 @@
+---
+title: "산업공학특론I_중간고사"
+author: "나재영 (2024189799)"
+date: "4/10/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=12, fig.height=12)
+```
+
+<br>
+<br>
+<br>
+
+### [중간고사 개요]
+
+<br>
+
+#### 1. 중간고사 답안 작성 및 제출 요령
+
+* 모든 답안 도출 과정은 R 코드로 작성되어야 하며, 코드에는 분석 과정을 식별할 수 있도록 주석(#)으로 설명이 작성되어야 한다. (R 코드 없이 답만 적는 경우 오답 처리)
+
+* 수강생 간 코드를 공유하거나 동일하게 작성하는 행위를 금지한다. (적발 시 진실의 방 소환 및 모두 0점으로 성적 반영)
+
+* 특정한 문제에 대한 답안은 해당 문항에 대한 코드에 작성되어야 한다. (1번 문항에 대한 답을 2번 문항에 적는 경우 오답 처리)
+
+* 답안은 Rmd 확장자로 보고서 제작이 가능하도록 제출하는 것을 원칙으로 하나, Markdown 실행이 어려운 경우 R 스크립트로 작성하되 채점이 가능하도록 문항 별로 스크립트를 작성하여야 한다. 
+
+* 중간고사 답안은 4월 10일 23시 59분까지 온라인 강의실 내 과제 및 평가 - 중간고사 탭에 제출하여야 하며, 4월 11일 자정 이후에는 제출이 불가하다. (이후 다른 경로를 통하여 제출 시 총점의 50%로 성적 반영)
+
+<br>
+<br>
+
+#### 2. 데이터 설명
+
+어느 의류 생산 공정에서는 재봉 (sewing), 마감 (finishing)으로 부서를 구성하여 공정을 운영하고 있으며,
+공정의 생산성을 개선하기 위해 일별 공정 작업 관련 데이터를 수집하여 생산성에 영향을 미치는 요인을 분석하고자 한다.
+데이터 분석에 활용하는 변수의 정보는 다음과 같다.
+
+* date: 집계 날짜
+* quarter: 한 달을 나눈 분기 (주)
+* department: 부서
+* day: 요일
+* team: 부서별 투입 인원 수
+* targeted_productivity: 당초에 목표한 생산성 점수
+* over_time: 초과근무 (분)
+* incentive: 성과급
+* actual_productivity: 실제 생산성 점수
+
+<br>
+
+상기에 기술된 작성요령과 데이터를 기반으로 주어진 문제에 대한 분석 과정과 그에 따른 답안을 기술하시오.
+
+
+<br>
+<br>
+<br>
+
+
+### [중간고사 문항]
+
+<br>
+
+#### 1. 주어진 데이터에서 데이터 탐색 (EDA) 및 전처리를 수행하고, 결과를 시각화하시오. (10점)
+
+* 활용하지 않는 변수 (date, smv, wip, idle_time, idle_men, no_of_style_change, no_of_workers)는 삭제할 것
+* 시각화 시 범주형 변수는 막대그래프로, 연속형 변수는 히스토그램으로 표현할 것
+
+```{r no_1}
+
+# 데이터 불러오기
+clth_dat = read.csv('산업공학특론I_중간고사 데이터.csv')
+
+# 데이터 확인
+head(clth_dat)
+summary(clth_dat)
+
+# 활용할 변수 및 활용하지 않는 변수 확인
+colnames(clth_dat)
+
+# 활용하지 않는 변수* 삭제
+# * [1]date, [7]smv, [8]wip, [11]idle_time, [12]idle_men, [13]no_of_style_change, [14]no_of_workers
+delcol = c(1,7,8,11,12,13,14) # 필요 없는 열
+clth_dat_pp = clth_dat[-delcol] # 필요 없는 열 삭제
+
+# 전처리 후 데이터 확인
+colnames(clth_dat_pp)
+head(clth_dat_pp)
+summary(clth_dat_pp)
+
+# 각 열의 카테고리 수 확인
+{
+  for(i in 1:ncol(clth_dat_pp)){
+    print(c(colnames(clth_dat_pp[i]), length(table(clth_dat_pp[i]))))
+  }
+  print(c('data length',nrow(clth_dat_pp)))
+}
+
+# department의 'finishing'과 'finishing '을 하나로 묶음
+c = clth_dat_pp$department
+c = gsub(pattern = 'finishing ', replacement = 'finishing', c)
+print(table(c))
+clth_dat_pp$department = c
+
+# 데이터가 범주형 변수인지 확인
+# * [1]quarter, [2]department, [3]day, [4]team, [5]targeted_productivity
+
+for(i in 1:5){
+  print(table(clth_dat_pp[i]))
+}
+
+# 범주형 변수(1~5)에 대한 시각화 (막대그래프)
+
+for(i in 1:5){
+  barplot(table(clth_dat_pp[i]),main = colnames(clth_dat_pp[i]))
+}
+
+# 연속형 변수(6~8)에 대한 시각화 (히스토그램)
+
+for(i in 6:8){
+  hist(clth_dat_pp[,i], main = colnames(clth_dat_pp[i]))
+}
+
+# head(sort(clth_dat_pp$incentive, decreasing = T), n=50)
+
+```
+
+<br>
+<br>
+
+#### 2. 실제 생산성 점수 (actual_productivity)가 어떠한 분포를 따르는지 규명하기 위하여 여러 분포에 대한 MLE를 추정 및 비교하고, 최적 분포를 도출하시오. (15점)
+
+* 여러 분포 (최소 2개 이상)에 대하여 MLE를 통하여 모수를 추정할 것
+* 분포별 추정 결과 비교 시 적합도 평가 지표를 활용할 것
+* 추정 결과에 따른 최적 분포를 도출하고, 그 근거를 제시할 것
+
+```{r no_2}
+
+# 사용할 데이터 추출
+
+dat = clth_dat_pp$actual_productivity
+
+# MLE(최대우도법)를 위한 분포별 로그우도함수(log-likelihood function) 및 계산
+??fitdist
+
+# Normal Distribution 가정 및 모수 추정
+
+mlen = function(prm){
+  -sum(dnorm(dat, mean = prm[1], sd = prm[2], log = TRUE))
+}
+
+optn = optim(c(mean(dat),sd(dat)), mlen)
+
+# Log-normal Distribution 가정 및 모수 추정
+
+mleln = function(prm){
+  -sum(dlnorm(dat, meanlog = prm[1], sdlog = prm[2], log = TRUE))
+}
+
+optln = optim(c(mean(log(dat)),sd(log(dat))), mleln)
+
+
+# Gamma Distribution 가정 및 모수 추정
+
+mleg = function(prm){
+  -sum(dgamma(dat, shape = prm[1], rate = prm[2], log = TRUE))
+}
+
+optg = optim(c(1,1), mleg)
+
+
+# Weibull Distribution 가정 및 모수 추정
+
+mlew = function(prm){
+  -sum(dweibull(dat, shape = prm[1], scale = prm[2], log = TRUE))
+}
+
+optw = optim(c(1,1), mlew)
+
+
+# 각 분포 시각화
+
+{
+hist(dat, col='grey', main = 'actual_productivity',prob = T)
+curve(dnorm(x, mean = optn$par[1], sd = optn$par[2]), col='red', add = TRUE)
+curve(dlnorm(x, meanlog = optln$par[1], sdlog = optln$par[2]), col='yellow', add = TRUE)
+curve(dgamma(x, shape = optg$par[1], rate = optg$par[2]), col='blue', add = TRUE)
+curve(dweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', add = TRUE)
+legend('topleft',legend = c('Normal','Log-normal','Gamma','Weibull'), col=c('red','yellow','blue','green'), lty = 1, lwd = 2)
+
+plot(ecdf(dat), col='grey', main = 'CDF')
+curve(pnorm(x, mean = optn$par[1], sd = optn$par[2]), col='red', lwd = 2, add = TRUE)
+curve(plnorm(x, meanlog = optln$par[1], sdlog = optln$par[2]), col='yellow', lwd = 2, add = TRUE)
+curve(pgamma(x, shape = optg$par[1], rate = optg$par[2]), col='blue', lwd = 2, add = TRUE)
+curve(pweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', lwd = 2, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+}
+
+# 각 분포별 최대우도값 비교
+
+print(c(-optn$value, -optln$value, -optg$value, -optw$value))
+
+
+# 각 분포별 적합도 평가를 위한 AIC, BIC 비교
+
+AICn = -2*-mlen(optn$par)+2*length(optn$par)
+AICln = -2*-mleln(optln$par)+2*length(optln$par)
+AICg = -2*-mleg(optg$par)+2*length(optg$par)
+AICw = -2*-mlew(optw$par)+2*length(optw$par)
+
+print(c(AICn, AICln, AICg, AICw))
+
+BICn = -2*-mlen(optn$par)+2*length(optn$par)*log(length(dat))
+BICln = -2*-mleln(optln$par)+2*length(optln$par)*log(length(dat))
+BICg = -2*-mleg(optg$par)+2*length(optg$par)*log(length(dat))
+BICw = -2*-mlew(optw$par)+2*length(optw$par)*log(length(dat))
+
+print(c(BICn, BICln, BICg, BICw))
+
+# 최대 우도값이 가장 높으며, AIC & BIC 값이 가장 작은 Weibull 분포를 최적 분포로 선정
+
+# Weibull 분포가 왼쪽으로 긴 꼬리(Left-Skewed, 왜도값이 음수)를 가진 실 데이터의 형태를 가장 잘 나타냄
+
+```
+
+<br>
+<br>
+
+#### 3. 2. 에서 도출된 최적 분포를 기준으로 MLE 추정 결과를 시각화하고 이를 해석하시오. (10점)
+
+* 시각화의 경우 실제 데이터의 분포와 MLE를 모수로 가지는 분포의 비교가 가능하도록 도시할 것
+* 단순 도시가 아닌 도시 결과에 대한 해석 결과를 설명하고, 결론을 도출할 것
+
+```{r no_3}
+
+# 와이블 분포 시뮬레이션 (원 데이터와 동일한 n수)
+
+simul_actprod = rweibull(n = length(dat), shape = optw$par[1], scale = optw$par[2])
+
+# 최적 분포 시뮬레이션 결과와 원 데이터 비교 (시각화)
+
+{
+hist(dat, col = adjustcolor('red', alpha = 0.8), main = 'Histogram', prob = T)
+hist(simul_actprod, col = adjustcolor('green', alpha = 0.2), prob = T, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+
+plot(density(dat), col='red', main = 'PDF', lwd = 2)
+curve(dweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', lwd = 2, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+
+plot(ecdf(dat), col='red', main = 'CDF', lwd = 2)
+curve(pweibull(x, shape = optw$par[1], scale = optw$par[2]), col='green', lwd = 2, add = TRUE)
+legend('topleft',legend = c('Actual Productivity','Simulated'), col=c('red','green'), lty = 1, lwd = 2)
+}
+
+### 도시 결과 해석 ###
+# 실제 생산성 점수(actual_productivity)가 0.9를 넘는 높은 값은 와이블 분포의 모델링과 유사함 (pdf & cdf fitness)
+# 실제 분포의 생산성이 낮은 경우(0.4~0.7)가 추정 분포보다 적게 나타남
+# 반대로 매우 낮은 경우(0~0.4)와 평시(0.8)는 추정 분포보다 많게 나타남
+
+# 이는 다음과 같은 유사성으로 인해 실제 생산성 점수(actual_productivity)의 분포는 평균 점수가 높은 시험의 점수 분포와 유사할 것으로 생각됨
+# 1. 상방 한계가 존재하며, 평균값이 Range의 중간보다 윗쪽에 치우침(Left-Skewed)
+# 2. 일부 시험을 포기하고 찍은 사람들이 있으며 비슷하게 낮은 점수를 얻으므로 왼쪽꼬리가 길고 두꺼움
+# 위 현상을 잘 나타낼 수 있는 분포가 있다면, 시간관련 분포인 Weibull 분포보다 더욱 정확한 모델링을 할 수 있을것으로 생각 됨
+
+```
+
+<br>
+<br>
+
+#### 4. 주차 (quarter), 부서 (department), 요일 (day) 별로 목표하는 점수 (targeted_productivity), 실제 생산성 점수 (actual_productivity)에 차이가 없는지 그룹화를 수행하고 각 점수에 대해 기술통계량을 검토하시오. (10점)
+
+* 기술통계량은 목표 점수, 실제 점수 모두 검토할 것
+* 기술통계량 검토 결과를 해석하여 본인의 생각과 결론을 글로 작성할 것
+
+```{r no_4}
+
+# 그룹에 따른 기술통계량을 계산해주는 함수 작성
+
+dsmat = function(x){
+
+  clist = c() # 기술통계량을 담을 리스트 추가
+  
+  for (i in 1:length(table(x))){
+    
+    sd = subset(clth_dat_pp, x == names(table(x))[i]) # 데이터 분할
+    
+    # 분할된 데이터에서 targeted_productivity와 actual_productivity 추출
+    tar = sd$targeted_productivity
+    act = sd$actual_productivity
+
+    # 리스트에 통계량 추가
+    clist = c(clist, c(length(tar),mean(tar), mean(act), sd(tar), sd(act), median(tar), median(act), min(tar), max(tar), min(act), max(act)))
+    
+  }
+  
+  # 리스트를 바탕으로 매트릭스 생성
+  result = matrix(clist, nrow = 11)
+  
+  # 행/열 이름 설정
+  colnames(result) = names(table(x))
+  rownames(result) = c("데이터 수", "목표 생산성 평균", "실제 생산성 평균", "목표 생산성 표준편차", "실제 생산성 표준편차", "목표 생산성 중위값", "실제 생산성 중위값", "목표 생산성 최소", "목표 생산성 최대", "실제 생산성 최소", "실제 생산성 최대")
+  
+  return(result)
+  
+}
+
+
+# 그룹별 기술통계량 검토
+
+print(dsmat(clth_dat_pp$quarter))
+print(dsmat(clth_dat_pp$department))
+print(dsmat(clth_dat_pp$day))
+
+
+# 기술통계량 검토 결과
+
+# 주차(quarter)별 목표/실제 생산성 점수
+
+# 평균값이 Quarter1, Quarter2에서 목표와 실제 생산성이 Quarter3, Quarter4에 비해 살짝 높은 모습을 보이며, Quarter5는 데이터 수가 부족하긴 하지만 실제 생산성이 다른 주차에 비해 10% 가량 높음
+# 검정으로 확인하면 정확하겠지만, 값만 보고 유추하면 주차별 목표/실제 생산성 점수간에 유의미한 차이는 없는 것으로 보임
+
+# 부서(department)별 목표/실제 생산성 점수
+
+# finishing 공정의 목표/실제 생산성이 sweing 공정보다 평균적으로 소폭 높은 것으로 나타남
+# 검정으로 확인이 필요하지만, 값만 보고 유추하자면 부서별 목표/실제 생산성 점수간에 유의미한 차이는 없는 것으로 보임
+
+# 요일(day)별 목표/실제 생산성 점수
+
+# 데이터 수와 평균의 분포가 요일에 상관없이 큰 편차 없이 고르게 분포 됨
+# 데이터 검정 없이 값만 보고 유추하면 요일별 목표/실제 생산성 점수간에 유의미한 차이는 없는 것으로 보임
+
+```
+
+<br>
+<br>
+
+#### 5. 부서 (department) 별로 실제 생산성 점수 (actual_productivity)의 분포에 차이가 있다고 볼 수 있는지 검정하고자 한다. 신뢰수준 99% 하에서 모평균, 모분산 가설검정을 수행하시오. (10점)
+
+* 가설검정을 수행할 때에는 5단계의 절차를 준용하여 코드 및 설명을 작성할 것
+* 모평균 검정 시 모분산은 알려지지 않았으며, 부서별 생산성 점수의 모분산은 다르다고 가정
+
+```{r no_5}
+
+## 등분산 여부를 확인하기 위해 모분산 가설검정 먼저 수행
+
+# 모분산 가설검정
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : var_fin = var_sew
+# >> 대립가설 H_1 : var_fin != var_sew
+#    (m_fin은 finishing 부서의 생산성 점수 평균, m_sew는 sweing 부서의 생산성 점수 평균)
+# 정리하면; H_0: var_fin/var_sew = 1, H_1: var_fin/var_sew != 1
+
+# 단계2) 유의수준 설정
+
+a_ap_dp = 0.99
+
+# 단계3) 분포 및 기각역 설정
+
+dat_ap_dp = split(clth_dat_pp$actual_productivity, clth_dat_pp$department)
+
+# 두 개의 모분산의 비에 관한 검정(F-검정)
+if(var(dat_ap_dp$finishing) > var(dat_ap_dp$sweing)){
+  print("V1 = var_fin")
+} else {
+  
+  print("V1 = var_sew")
+}
+# 신뢰구간 상한
+F_max_ap_dp = (var(dat_ap_dp$finishing)/var(dat_ap_dp$sweing))/qf((1-a_ap_dp)/2, df1 = length(dat_ap_dp$finishing)-1, df2 = length(dat_ap_dp$sweing)-1)
+# 신뢰구간 하한
+F_min_ap_dp = (var(dat_ap_dp$finishing)/var(dat_ap_dp$sweing))/qf(1-(1-a_ap_dp)/2, df1 = length(dat_ap_dp$finishing)-1, df2 = length(dat_ap_dp$sweing)-1)
+
+
+# 단계4) 검정통계량 계산
+
+var.test(dat_ap_dp$finishing, dat_ap_dp$sweing, conf.level = 0.99)
+F_0_ap_dp = var(dat_ap_dp$finishing)/var(dat_ap_dp$sweing)
+
+# 단계5) 결론 도출
+
+# 유의성 판정
+
+if(1 < F_max_ap_dp && 1 > F_min_ap_dp){
+  print("신뢰구간 내")
+} else {
+  print("신뢰구간 외")
+}
+
+# >> 가설(var_fin/var_sew = 1)이 신뢰구간 밖에 있으므로 귀무가설 기각하여, 두 분포의 분산은 다르다고 판정 (차이 유의미)
+# >> t-test 결과 p-value가 설정한 신뢰 수준보다 낮으며, var_fin/var_sew = 1을 가정했지만 1이 99 percent confidence interval 내에 포함되지 않으므로 귀무가설 기각
+
+
+# 모평균 가설검정 (불등분산 가정)
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : m_fin = m_sew
+# >> 대립가설 H_1 : m_fin != m_sew
+#    (m_fin은 finishing 부서의 생산성 점수 평균, m_sew는 sweing 부서의 생산성 점수 평균)
+
+# 단계2) 유의수준 설정
+
+a_ap_dp = 0.99
+
+# 단계3) 분포 및 기각역 설정
+
+# 모분산 미지이며 두 그룹간 모분산이 같지 않으므로 t-검정 수행
+# 등가 자유도 계산
+
+dfin = var(dat_ap_dp$finishing)/length(dat_ap_dp$finishing)
+dsew = var(dat_ap_dp$sweing)/length(dat_ap_dp$sweing)
+
+dfeq = ((dfin+dsew)^2)/((dfin^2)/((length(dat_ap_dp$finishing)-1))+((dsew^2)/(length(dat_ap_dp$sweing)-1)))
+
+# 신뢰구간 상한
+
+U_max_ap_dp = qt(1-(1-a_ap_dp)/2,df = dfeq)
+# 신뢰구간 하한
+U_min_ap_dp = -U_max_ap_dp
+
+# 단계4) 검정통계량 계산
+
+dat_ap_dp = split(clth_dat_pp$actual_productivity, clth_dat_pp$department)
+U_0_ap_dp = (mean(dat_ap_dp$finishing)-mean(dat_ap_dp$sweing))/sqrt(dfin+dsew)
+
+t_ap_dp = t.test(dat_ap_dp$finishing, dat_ap_dp$sweing, conf.level = a_ap_dp, var.equal = FALSE)
+
+# 단계5) 결론 도출
+
+# 유의성 판정
+if(U_0_ap_dp < U_max_ap_dp && U_0_ap_dp > U_min_ap_dp){
+  print("신뢰구간 내")
+} else {
+  print("신뢰구간 외")
+}
+
+t_ap_dp
+
+# >> 검정통계량이 신뢰구간 밖에 있으므로 귀무가설 기각하여, 두 분포의 평균이 다르다고 판정 (차이 유의미)
+# >> F-test 결과 p-value가 설정한 신뢰 수준보다 낮으며, m_fin - m_sew = 0을 가정했지만 0이 99 percent confidence interval 내에 포함되지 않으므로 귀무가설 기각
+
+
+
+```
+
+<br>
+<br>
+
+#### 6. 부서에 따라 목표 생산성 점수 (targeted_productivity) 대비 실제로 달성한 생산성 점수 (actual_productivity)를 초과하는 비율에 차이가 있는지 살펴보고자 한다. 부서 (department) 별로 목표량을 초과하여 생산이 이루어진 비율에 차이가 있는지 95% 신뢰수준 하에서 검정을 수행하고, 달성 비율 차이에 대한 신뢰구간을 산출하시오. (15점)
+
+* 부서별 전체 데이터 중 목표 생산성 점수가 실제 생산성 점수를 초과하는 비율이 같은지 비교할 것
+
+```{r no_6}
+
+# 부서별 생산성 초과율 산출
+
+{
+  # 각 부서별 생산성 초과 수 및 작업 수
+  fin_sp = 0
+  sew_sp = 0
+  n_fin = 0
+  n_sew = 0
+
+  for(i in 1:length(clth_dat_pp$department)){
+    if(clth_dat_pp$department[i] == 'finishing'){
+      n_fin = n_fin + 1
+      if(clth_dat_pp$actual_productivity[i]>clth_dat_pp$targeted_productivity[i]){
+        fin_sp = fin_sp + 1
+      }
+    }else if(clth_dat_pp$department[i] == 'sweing'){
+      n_sew = n_sew + 1
+      if(clth_dat_pp$actual_productivity[i]>clth_dat_pp$targeted_productivity[i]){
+        sew_sp = sew_sp + 1
+      }
+    }
+  }
+  
+  finrat = fin_sp/n_fin # finishing 공정 생상성 초과 달성률
+  sewrat = sew_sp/n_sew # sweing 공정 생상성 초과 달성률
+  nrat = (fin_sp+sew_sp)/(n_fin+n_sew)
+}
+
+# n수가 충분히 크므로 정규분포 근사 후 검정 수행 (이항분포의 P <= 0.5, nP >= 5 시 정규분포에 근사)
+# * 두 모부적합품률의 차의 검정과 유사
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : finrat = sewrat
+# >> 대립가설 H_1 : finrat != sewrat
+
+# 단계2) 유의수준 설정
+
+a_p_rat = 0.95
+
+# 단계3) 분포 및 기각역 설정
+
+U_max_p_rat = abs(finrat-sewrat)+qnorm((1-a_p_rat)/2)*sqrt((finrat*(1-finrat)/n_fin)+(sewrat*(1-sewrat)/n_sew))
+U_min_p_rat = abs(finrat-sewrat)-qnorm((1-a_p_rat)/2)*sqrt((finrat*(1-finrat)/n_fin)+(sewrat*(1-sewrat)/n_sew))
+
+# 단계4) 검정통계량 계산
+
+U_0_p_rat = abs(finrat-sewrat)/sqrt(nrat*(1-nrat)*((1/n_fin)+(1/n_sew)))
+
+# 단계5) 결론 도출
+
+if(U_0_p_rat < U_max_p_rat && U_0_p_rat > U_min_p_rat){
+  print("신뢰구간 내")
+} else {
+  print("신뢰구간 외")
+}
+
+# >> 검정통계량이 신뢰구간 밖에 있으므로 귀무가설 기각하여, 생산성 초과 달성 비율이 다르다고 판정 (차이 유의미)
+
+```
+
+<br>
+<br>
+
+#### 7. 생산 공정에 투입되는 인원 (team)이 요일 (day)에 관계없이 동일한지 검정하고자 한다. 신뢰수준 95%에서 가설검정을 수행하시오. (15점)
+
+* 요일별로 평균적인 투입 인원을 산출할 것
+* 실제 투입 인원이 요일에 관계없이 동일한 경우와 비교하여 가설검정을 수행할 것
+
+
+```{r no_7}
+
+## 인원수 평균에 대한 일차분할
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : 모든 요일별 평균 투입 인원이 동일
+# >> 대립가설 H_1 : 요일별 평균 투입 인원이 하나라도 다름
+
+
+# 단계2) 유의수준 설정
+
+a_t_d = 0.95
+
+# 단계3) 분포 및 기각역 설정
+
+dat_t_d = split(clth_dat_pp$team, clth_dat_pp$day) # 데이터 분할
+
+# 일차 분할표 작성
+
+{
+  md = c()
+
+  for(i in 1:length(dat_t_d)){
+    m = subset(clth_dat_pp$team, clth_dat_pp$day == names(dat_t_d)[i])
+    md = c(md, mean(m)) # 요일별 평균의 리스트
+  }
+  ma = rep(mean(clth_dat_pp$team), length(dat_t_d)) # 전체 평균의 리스트
+  mat = matrix(c(md,ma), nrow = 2, byrow = TRUE)
+  rownames(mat) = c("요일별 평균(observation)", "전체 평균(expectation)")
+  colnames(mat) = names(dat_t_d)
+}
+
+# 동일성 검정을 위한 Chi-Square 분포(자유도 = n-1) 설정
+chi_a = qchisq(a_t_d, (length(dat_t_d)-1))
+
+# 단계4) 검정통계량 계산
+
+{
+  csq_t_d = 0
+
+  for(i in 1:(length(dat_t_d))){
+    csq_t_d = csq_t_d + (((mat[1,i]-mat[2,i])^2)/mat[2,i])
+  }
+}
+
+# 단계5) 결론 도출
+
+chisq.test(rbind(md,ma))
+csq_t_d
+if(csq_t_d > chi_a){
+  print("귀무가설 기각")
+}else{
+  print("귀무가설 채택")
+}
+
+# 귀무가설 채택하여, 생산 공정에 투입되는 인원(team)이 요일(day)에 관계없이 동일하다고 판정
+
+
+## 팀 수에 따른 m X n 분할 (* team이 팀 번호를 나타내는 경우)
+
+# 팀 1~12, 요일 1~6 의 이산형이므로 12*6 분할표 작성
+
+dat_t_d = split(clth_dat_pp$team, clth_dat_pp$day)
+m_n = sapply(dat_t_d, table)
+
+# 요일별 팀 분포 팀별 평균 산출
+
+m_t_d = c()
+
+for(i in 1:12){
+  m_t_d = c(m_t_d,(sum(m_n[i,])/6))
+}
+
+mat = matrix(rep(m_t_d,6), ncol = 6, nrow = 12)
+
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : 모든 요일별 팀 분포가 일치
+# >> 대립가설 H_1 : 하나라도 요일별 팀 분포가 일치하지 않음
+
+
+# 단계2) 유의수준 설정
+
+a_t_d = 0.95
+
+# 단계3) 분포 및 기각역 설정
+
+# 동일성 검정을 위한 Chi-Square 분포(자유도 m-1*n-1) 설정
+chi_a = qchisq(a_t_d, (12-1)*(6-1))
+
+# 단계4) 검정통계량 계산
+
+{
+  csq_t_d = 0
+
+  for(i in 1:12){
+    for(j in 1:6){
+      csq_t_d = csq_t_d + (((m_n[i,j] - mat[i,j])^2)/mat[i,j])
+    }
+  }
+}
+
+# 단계5) 결론 도출
+
+if(csq_t_d > chi_a){
+  print("귀무가설 기각")
+}else{
+  print("귀무가설 채택")
+}
+
+# 귀무가설 채택하여, 생산 공정에 투입되는 팀(team)의 분포가 요일(day)에 관계없이 동일하다고 판정
+
+```
+
+
+<br>
+<br>
+
+#### 8. 초과근무 시간 (over_time)과 성과급 (incentive)이 연관성이 있는지 가설검정을 통하여 확인하고자 한다. 신뢰수준 90%에서 가설검정을 수행하고, 이에 대한 결론을 도출하시오. (15점)
+
+* 이상치를 배제하기 위하여 인센티브는 80, 초과근무는 8000 미만인 대상만 고려할 것
+* 연속형 변수의 경우, 이산화를 진행하여 변수를 처리해주어야 함
+* 검정을 위한 테이블은 5행 5열로 구성할 것
+
+```{r no_8}
+
+# 이상치 제거
+
+dat_i = subset(clth_dat_pp, subset = incentive < 80) # 인센티브 80 미만인 대상만 고려
+dat_io = subset(dat_i, subset = over_time < 8000) # 초과근무 8000 미만인 대상만 고려
+
+# 변수 이산화 처리
+
+dat_io$inc_cut = cut(dat_io$incentive, breaks = 5)
+dat_io$ot_cut = cut(dat_io$over_time, breaks = 5)
+
+dat_io$inc_cut[1]
+
+# 5*5 분할표 작성
+
+dat_io = split(dat_io$inc_cut, dat_io$ot_cut)
+matio = sapply(dat_io, table)
+
+# 단계1) 귀무가설/대립가설 설정
+
+# >> 귀무가설 H_0 : 두 변수 사이에는 연관성이 없음 (독립)
+# >> 대립가설 H_1 : 두 변수 사이에는 연광성이 있음 (종속)
+
+# 단계2) 유의수준 설정
+
+a_io = 0.95
+
+# 단계3) 분포 및 기각역 설정
+
+chi_io = qchisq(a_io, (5-1)*(5-1))
+
+# 단계4) 검정통계량 계산
+
+chisq_io = chisq.test(matio)
+chisq_io$statistic
+
+# 단계5) 결론 도출
+
+if(chisq_io$statistic > chi_io){
+  print("귀무가설 기각")
+}else{
+  print("귀무가설 채택")
+}
+
+# 귀무가설 기각하여, 두 변수 사이에는 연광성이 있다고(종속) 판정
+
+```
+
